@@ -1,0 +1,26 @@
+<resources>
+
+    <string name="app_name">findExchange</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+	<string name="USD">美元 (USD)</string>
+	<string name="HKD">港幣 (HKD)</string>
+	<string name="GBP">英鎊 (GBP)</string>
+	<string name="AUD">澳幣 (AUD)</string>
+	<string name="CAD">加拿大幣 (CAD)</string>
+	<string name="SGD">新加坡幣 (SGD)</string>
+	<string name="CHF">瑞士法郎 (CHF)</string>
+	<string name="JPY">日圓 (JPY)</string>
+	<string name="ZAR">南非幣 (ZAR)</string>
+	<string name="SEK">瑞典幣 (SEK)</string>
+	<string name="NZD">紐元 (NZD)</string>
+	<string name="THB">泰幣 (THB)</string>
+	<string name="PHP">菲國比索 (PHP)</string>
+	<string name="IDR">印尼幣 (IDR)</string>
+	<string name="EUR">歐元 (EUR)</string>
+	<string name="KRW">韓元 (KRW)</string>
+	<string name="VND">越南盾 (VND)</string>
+	<string name="MYR">馬來幣 (MYR)</string>
+	<string name="CNY">人民幣 (CNY)</string>
+</resources>
