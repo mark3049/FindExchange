@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="even">#D6D2CE</color>
+    <color name="odd">#F8F6F1</color>
+	<color name="normal">#000000</color>
+	<color name="red">#FF0000</color>
+</resources>

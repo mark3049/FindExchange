@@ -1,8 +1,80 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
-  
+    <LinearLayout
+        android:id="@+id/adview"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+    </LinearLayout>
 
-</RelativeLayout>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dp"
+        android:orientation="horizontal"
+        android:padding="2dp" >
+
+        <TextView
+            android:layout_width="120dip"
+            android:layout_height="wrap_content"
+            android:text="@string/nr" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:text="@string/rate_buy" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:text="@string/rate_sell" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#FF909090" />
+
+    <ListView
+        android:id="@+id/context"
+        android:layout_width="fill_parent"
+        android:layout_height="0dip"
+        android:layout_margin="3dp"
+        android:layout_weight="1"
+        android:padding="2dp" >
+    </ListView>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#FF909090" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dp"
+        android:orientation="horizontal"
+        android:padding="2dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/last_update_tag" />
+
+        <TextView
+            android:id="@+id/last_update"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+</LinearLayout>
