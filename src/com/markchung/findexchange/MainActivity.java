@@ -10,6 +10,11 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
+
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +47,11 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	private TimerTask m_task;
 	private Timer m_timer;
 	ItemListAdapter adapter;
+	
+	private static final String myAdID = "a150724cb805164";
+	private static final String myTestDevice = "BA76119486D364D047D0C789B4F61E46";
+	private static final String myTestDevice2 = "CF95DC53F383F9A836FD749F3EF439CD";
+	private AdView adview;
 
 	static class MyHandler extends Handler {
 		WeakReference<MainActivity> mActivity;
@@ -66,6 +77,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		CreateAdRequest(this, (LinearLayout) findViewById(R.id.adview));
 		m_listView = (ListView) this.findViewById(R.id.context);
 		m_lastdateView = (TextView) findViewById(R.id.last_update);
 		m_DollarShortNames = this.getResources().getStringArray(
@@ -152,7 +164,12 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		edit.commit();
 		super.onStop();
 	}
-
+	@Override
+	protected void onDestroy() {
+		if (adview != null)
+			adview.destroy();
+		super.onDestroy();
+	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_main, menu);
@@ -349,5 +366,16 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		String message = String.format(getString(R.string.dialog_body_search),this.m_DollarDispayNames[position]);
 		myDialog = ProgressDialog.show(this, title, message, true, true);
 		new DownloadYahooWebpageText().execute(position);
+	}
+	void CreateAdRequest(Activity activity, LinearLayout view) {
+		adview = new AdView(activity, AdSize.BANNER, myAdID);
+		view.addView(adview);
+		AdRequest adRequest = new AdRequest();
+		if (BuildConfig.DEBUG) {
+			adRequest.addTestDevice(AdRequest.TEST_EMULATOR);
+			adRequest.addTestDevice(myTestDevice);
+			adRequest.addTestDevice(myTestDevice2);
+		}
+		adview.loadAd(adRequest);
 	}
 }
