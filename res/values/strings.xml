@@ -47,8 +47,10 @@
     <string name="title_activity_main">匯率兌換</string>
     <string name="title_yahoo">各銀行%s兌換匯率</string>
     <string name="nr">幣別</string>
-    <string name="rate_buy">現金買入</string>
-    <string name="rate_sell">現金賣出</string>
+    <string name="rate_buy_cash">現金買入</string>
+    <string name="rate_sell_cash">現金賣出</string>
+    <string name="rate_buy_spot">即期買入</string>
+    <string name="rate_sell_spot">即期賣出</string>
     <string name="update">立即更新</string>
     <string name="last_update_tag">最後更新日期</string>
     <string name="UpdateError">無法更新</string>
@@ -59,7 +61,7 @@
     <string name="banklist">金融機構</string>
     <string name="cash_sell">現金賣出</string>
     <string name="cash_buy">現金買進</string>
-    <string name="auto_update">自動更新</string>
+    <string name="enable_auto_update">啟動自動更新</string>
     <string name="disable_autoupdate">取消自動更新</string>
     <string name="msg_no_find">查無%s資料 </string>
 

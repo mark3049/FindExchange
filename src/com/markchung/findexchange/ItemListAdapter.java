@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 class BankListAdapter extends BaseAdapter {
@@ -113,10 +114,12 @@ public class ItemListAdapter extends BaseAdapter {
 	static class ViewHolder {
 		ImageView icon;
 		TextView name;
+		TextView abbre;
 		TextView rate;
 		TextView rate1;
-		//TextView rate2;
-		//TextView rate3;
+		TextView rate2;
+		TextView rate3;
+		//Button btn;
 	}
 
 	private LayoutInflater minflater;
@@ -131,13 +134,15 @@ public class ItemListAdapter extends BaseAdapter {
 			R.drawable.eur, R.drawable.krw, R.drawable.vnd, R.drawable.myr,
 			R.drawable.cny };
 	private String[] m_dollorName = null;// = new String[TOTAL_ITEMS];
+	private String[] m_abbreName=null;
 	private static Bitmap[] icon = new Bitmap[TOTAL_ITEMS];
 
 	NumberFormat nr;
 
-	public ItemListAdapter(Context context, ExchangeRateProvider provider,String []dollars) {
+	public ItemListAdapter(Context context, ExchangeRateProvider provider,String []dollars,String []abbre) {
 		res = context.getResources();
 		m_dollorName = dollars;
+		m_abbreName = abbre;
 		m_provider = provider;
 		
 		nr = NumberFormat.getNumberInstance();
@@ -179,10 +184,12 @@ public class ItemListAdapter extends BaseAdapter {
 			holder = new ViewHolder();
 			holder.icon = (ImageView) convertView.findViewById(R.id.item_icon);
 			holder.name = (TextView) convertView.findViewById(R.id.name);
-			holder.rate = (TextView) convertView.findViewById(R.id.rate);
-			holder.rate1 = (TextView) convertView.findViewById(R.id.rate1);
-			//holder.rate2 = (TextView) convertView.findViewById(R.id.rate2);
-			//holder.rate3 = (TextView) convertView.findViewById(R.id.rate3);
+			holder.abbre = (TextView) convertView.findViewById(R.id.abbre);
+			holder.rate = (TextView) convertView.findViewById(R.id.rate_buy_cash);
+			holder.rate1 = (TextView) convertView.findViewById(R.id.rate_sell_cash);
+			holder.rate2 = (TextView) convertView.findViewById(R.id.rate_buy_spot);
+			holder.rate3 = (TextView) convertView.findViewById(R.id.rate_sell_spot);
+			//holder.btn = (Button) convertView.findViewById(R.id.search);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
@@ -194,10 +201,11 @@ public class ItemListAdapter extends BaseAdapter {
 		}
 		holder.icon.setImageBitmap(icon[position]);
 		holder.name.setText(m_dollorName[position]);
+		holder.abbre.setText(m_abbreName[position]);
 		holder.rate.setText(getText(position,ExchangeRateProvider.buy_cash));
 		holder.rate1.setText(getText(position,ExchangeRateProvider.sell_cash));
-		//holder.rate2.setText(getText(position,TaiwanBank.sell_spot));
-		//holder.rate3.setText(getText(position,TaiwanBank.sell_spot));
+		holder.rate2.setText(getText(position,ExchangeRateProvider.buy_spot));
+		holder.rate3.setText(getText(position,ExchangeRateProvider.sell_spot));
 		if((position&0x01)==0){
 			convertView.setBackgroundResource(R.color.odd);
 		}else{

@@ -12,6 +12,8 @@ public class ExchangeRateProvider {
 	private final static String TAG = "ExchangeRateProvider";
 	public final static int buy_cash = 0;
 	public final static int sell_cash = 1;
+	public final static int buy_spot = 2;
+	public final static int sell_spot = 3;
 
 	class ExchangeItem {
 		String tag;
@@ -19,8 +21,8 @@ public class ExchangeRateProvider {
 
 		ExchangeItem(String name) {
 			tag = name;
-			rate = new double[2];
-			rate[0] = rate[1] = -1;
+			rate = new double[4];
+			rate[0] = rate[1] =rate[2] = rate[3] = -1;
 		}
 	};
 
@@ -85,6 +87,8 @@ public class ExchangeRateProvider {
 		for (int i = 0; i < m_DollarShortNames.length; ++i) {
 			items[i].rate[0] = sets.getFloat(m_DollarShortNames[i] + "0", -1);
 			items[i].rate[1] = sets.getFloat(m_DollarShortNames[i] + "1", -1);
+			items[i].rate[2] = sets.getFloat(m_DollarShortNames[i] + "2", -1);
+			items[i].rate[3] = sets.getFloat(m_DollarShortNames[i] + "3", -1);
 		}
 	}
 
@@ -93,6 +97,8 @@ public class ExchangeRateProvider {
 		for (int i = 0; i < m_DollarShortNames.length; ++i) {
 			edit.putFloat(m_DollarShortNames[i] + "0", (float) items[i].rate[0]);
 			edit.putFloat(m_DollarShortNames[i] + "1", (float) items[i].rate[1]);
+			edit.putFloat(m_DollarShortNames[i] + "2", (float) items[i].rate[2]);
+			edit.putFloat(m_DollarShortNames[i] + "3", (float) items[i].rate[3]);
 		}
 	}
 
@@ -133,7 +139,7 @@ public class ExchangeRateProvider {
 				items[index].rate[count] = -1;
 			}
 			++count;
-			if (count >= 2)
+			if (count >= 4)
 				break;
 		} while (true);
 	}

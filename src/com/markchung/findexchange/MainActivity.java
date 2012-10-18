@@ -7,6 +7,7 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -19,6 +20,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -27,6 +29,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
@@ -36,6 +39,10 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnItemClickListener {
 	private final static String TAG = "findexchange";
+	private static final int SEC = 1000;
+	private static final int MIN = 60 * SEC;
+	private static final int UpdateDestion = 10 * MIN;
+
 	private ListView m_listView;
 	private TextView m_lastdateView;
 	private ExchangeRateProvider m_dataProvider;
@@ -44,10 +51,11 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	private CharSequence message = null;
 	private String[] m_DollarShortNames;
 	private String[] m_DollarDispayNames;
-	private TimerTask m_task;
 	private Timer m_timer;
-	ItemListAdapter adapter;
-	
+	private ItemListAdapter adapter;
+	private boolean isUpdateRunning = false;
+	private Calendar m_lastCheckUpdate;
+	private boolean isAutoUpdate = true;
 	private static final String myAdID = "a150724cb805164";
 	private static final String myTestDevice = "BA76119486D364D047D0C789B4F61E46";
 	private static final String myTestDevice2 = "CF95DC53F383F9A836FD749F3EF439CD";
@@ -76,7 +84,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.activity_main);
+
 		CreateAdRequest(this, (LinearLayout) findViewById(R.id.adview));
 		m_listView = (ListView) this.findViewById(R.id.context);
 		m_lastdateView = (TextView) findViewById(R.id.last_update);
@@ -86,17 +96,83 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				.getStringArray(R.array.dollar);
 
 		m_dataProvider = new ExchangeRateProvider(this, m_DollarShortNames);
+		m_lastCheckUpdate = Calendar.getInstance();
 		if (savedInstanceState == null) {
 			SharedPreferences sets = getSharedPreferences(TAG, 0);
+			m_lastCheckUpdate.setTimeInMillis(sets.getLong("CHECK_UPDATE", 0));
 			isAutoUpdate = sets.getBoolean("AUTO_UPDATE", false);
 			m_dataProvider.LoadFromFile(sets);
+		} else {
+			m_lastCheckUpdate.setTimeInMillis(0);
 		}
 		m_lastdateView.setText(m_dataProvider.getDateTimeString());
-		adapter = new ItemListAdapter(this, m_dataProvider, m_DollarDispayNames);
+		adapter = new ItemListAdapter(this, m_dataProvider,
+				m_DollarDispayNames, m_DollarShortNames);
 		m_listView.setAdapter(adapter);
 		m_listView.setOnItemClickListener(this);
+		setProgressBarIndeterminateVisibility(false);
 
-		//
+	}
+
+	private void createTimer(long delay) {
+		if (m_timer != null) {
+			m_timer.cancel();
+		}
+		m_timer = new Timer(true);
+		TimerTask m_task = new TimerTask() {
+
+			@Override
+			public void run() {
+				Message msg = new Message();
+				msg.what = 1;
+				handler.sendMessage(msg);
+			}
+		};
+		m_timer.schedule(m_task, delay);
+	}
+
+	private void createTimer(long delay, long period) {
+		if (m_timer != null) {
+			m_timer.cancel();
+		}
+		m_timer = new Timer(true);
+		TimerTask m_task = new TimerTask() {
+
+			@Override
+			public void run() {
+				Message msg = new Message();
+				msg.what = 1;
+				handler.sendMessage(msg);
+			}
+		};
+		m_timer.schedule(m_task, delay, period);
+
+	}
+
+	private long ReScheduleTimer(long minDelay) {
+
+		Calendar d = m_dataProvider.getLastDate();
+
+		if (d == null || m_lastCheckUpdate.after(d)) {
+			d = m_lastCheckUpdate;
+		}
+		long delay = 0;
+
+		Calendar now = GregorianCalendar.getInstance();
+		long diff = (now.getTimeInMillis() - d.getTimeInMillis());
+		Log.d(TAG,
+				String.format("Diff is %d SEC:%f MIN", diff, ((double) diff)
+						/ SEC, ((double) diff) / MIN));
+		if (diff < UpdateDestion) {
+			delay = UpdateDestion - diff;
+		}
+
+		Log.d(TAG,
+				String.format("Delay is %d %f", delay, ((double) delay) / SEC));
+		if (delay < minDelay)
+			delay = minDelay;
+		return delay;
+
 	}
 
 	@Override
@@ -108,68 +184,32 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		super.onPause();
 	}
 
-	private static final int SEC = 1000;
-	private static final int MIN = 60 * SEC;
-	private static final int UpdateDestion = 10 * MIN;
-
-	private void ReScheduleTime(long minDelay) {
-		GregorianCalendar d = m_dataProvider.getLastDate();
-		if (m_timer != null) {
-			m_timer.cancel();
-		}
-		m_timer = new Timer(true);
-		long delay = 0;
-		if (d != null) {
-			Calendar now = GregorianCalendar.getInstance();
-			long diff = (now.getTimeInMillis() - d.getTimeInMillis());
-			Log.d(TAG, String.format("Diff is %d SEC:%f MIN", diff,
-					((double) diff) / SEC, ((double) diff) / MIN));
-			if (diff < UpdateDestion) {
-				delay = UpdateDestion - diff;
-			}
-		}
-		Log.d(TAG,
-				String.format("Delay is %d %f", delay, ((double) delay) / SEC));
-		if (delay < minDelay)
-			delay = minDelay;
-		m_task = new TimerTask() {
-			@Override
-			public void run() {
-				Message msg = new Message();
-				msg.what = 1;
-				handler.sendMessage(msg);
-			}
-		};
-		if (isAutoUpdate) {
-			m_timer.schedule(m_task, delay, UpdateDestion);
-		} else {
-			m_timer.schedule(m_task, delay);
-		}
-	}
-
 	@Override
 	protected void onResume() {
 		super.onResume();
-		ReScheduleTime(3 * SEC);
+		if (isAutoUpdate) {
+			createTimer(ReScheduleTimer(3 * SEC), UpdateDestion);
+		}
 	}
-
-	private boolean isAutoUpdate = true;
 
 	@Override
 	protected void onStop() {
 		SharedPreferences settings = getSharedPreferences(TAG, 0);
 		SharedPreferences.Editor edit = settings.edit();
 		edit.putBoolean("AUTO_UPDATE", isAutoUpdate);
+		edit.putLong("CHECK_UPDATE", m_lastCheckUpdate.getTimeInMillis());
 		m_dataProvider.SaveToFile(edit);
 		edit.commit();
 		super.onStop();
 	}
+
 	@Override
 	protected void onDestroy() {
 		if (adview != null)
 			adview.destroy();
 		super.onDestroy();
 	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_main, menu);
@@ -178,31 +218,35 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
 	@Override
 	public boolean onMenuOpened(int featureId, Menu menu) {
-		if (!isAutoUpdate) {
-			menu.findItem(R.id.auto_update).setTitle(R.string.auto_update);
-		} else {
-			menu.findItem(R.id.auto_update).setTitle(
-					R.string.disable_autoupdate);
-		}
+
+		menu.findItem(R.id.enable_auto_update).setVisible(!isAutoUpdate);
+		menu.findItem(R.id.disable_auto_update).setVisible(isAutoUpdate);
+
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-		if (id == R.id.update) {
-			Update();
-		} else if (id == R.id.auto_update) {
-			this.isAutoUpdate = !this.isAutoUpdate;
+		switch (id) {
+		case R.id.update:
+			Update(true);
 			if (isAutoUpdate) {
-				this.ReScheduleTime(1 * SEC);
-
+				createTimer(UpdateDestion, UpdateDestion);
+			}
+			break;
+		case R.id.enable_auto_update:
+		case R.id.disable_auto_update:
+			isAutoUpdate = !isAutoUpdate;
+			if (isAutoUpdate) {
+				createTimer(3 * SEC, UpdateDestion);
 			} else {
 				if (m_timer != null) {
 					m_timer.cancel();
 					m_timer = null;
 				}
 			}
+			break;
 		}
 		return true;
 	}
@@ -224,10 +268,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			String decodeString;
 			StringBuffer urldata = new StringBuffer();
 			while ((decodeString = in.readLine()) != null) {
-				// System.out.println(decodeString);
 				urldata.append(decodeString);
 			}
-			// System.out.println(htmlfile);
 			in.close();
 			return urldata.toString();
 		} finally {
@@ -235,7 +277,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		}
 	}
 
-	private class DownloadWebpageText extends AsyncTask<String, Void, ExchangeRateProvider> {
+	private class DownloadWebpageText extends
+			AsyncTask<String, Void, ExchangeRateProvider> {
 
 		@Override
 		protected ExchangeRateProvider doInBackground(String... urls) {
@@ -258,9 +301,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				myDialog.dismiss();
 				myDialog = null;
 			}
-			if (provider==null) {
+			if (provider == null) {
 				Toast.makeText(MainActivity.this,
-						getString(R.string.UpdateFinish), Toast.LENGTH_SHORT)
+						getString(R.string.UpdateError), Toast.LENGTH_SHORT)
 						.show();
 			} else {
 				String t1 = provider.getDateTimeString();
@@ -268,9 +311,6 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				if (!t1.equals(t2)) {
 					Log.d(TAG, String.format("Time Change: %s => %s", t2, t1));
 					adapter.update(provider);
-					if (isAutoUpdate) {
-						ReScheduleTime(UpdateDestion);
-					}
 					m_lastdateView.setText(t1);
 					m_dataProvider = provider;
 					Toast.makeText(MainActivity.this,
@@ -281,6 +321,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				}
 			}
 			isUpdateRunning = false;
+			setProgressBarIndeterminateVisibility(false);
+			m_lastCheckUpdate = Calendar.getInstance();
 		}
 	}
 
@@ -333,13 +375,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		}
 	}
 
-	private boolean isUpdateRunning = false;
-
-	void Update() {
-		Update(true);
-	}
-
-	void Update(boolean showDialog) {
+	private void Update(boolean showDialog) {
 		if (isUpdateRunning)
 			return;
 
@@ -351,6 +387,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		if (showDialog) {
 			myDialog = ProgressDialog.show(this, title, message, true, true);
 		}
+		setProgressBarIndeterminateVisibility(true);
 		new DownloadWebpageText().execute(ExchangeRateProvider.web_url);
 	}
 
@@ -362,11 +399,13 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			return;
 		if (title == null)
 			title = this.getString(R.string.dialog_title_wait);
-		
-		String message = String.format(getString(R.string.dialog_body_search),this.m_DollarDispayNames[position]);
+
+		String message = String.format(getString(R.string.dialog_body_search),
+				this.m_DollarDispayNames[position]);
 		myDialog = ProgressDialog.show(this, title, message, true, true);
 		new DownloadYahooWebpageText().execute(position);
 	}
+
 	void CreateAdRequest(Activity activity, LinearLayout view) {
 		adview = new AdView(activity, AdSize.BANNER, myAdID);
 		view.addView(adview);

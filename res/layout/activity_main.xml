@@ -20,22 +20,51 @@
 
         <TextView
             android:layout_width="120dip"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
+            android:textSize="24dip"
+            android:gravity="center"
             android:text="@string/nr" />
 
-        <TextView
-            android:layout_width="0dp"
+        <TableLayout
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="right"
-            android:text="@string/rate_buy" />
+            android:gravity="center" >
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="right"
-            android:text="@string/rate_sell" />
+            <TableRow>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:text="@string/rate_buy_cash" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:text="@string/rate_buy_spot" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:text="@string/rate_sell_cash" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right"
+                    android:text="@string/rate_sell_spot" />
+            </TableRow>
+        </TableLayout>
     </LinearLayout>
 
     <View
@@ -73,8 +102,8 @@
             android:id="@+id/last_update"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
-            android:gravity="right"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:gravity="right" />
     </LinearLayout>
 
 </LinearLayout>

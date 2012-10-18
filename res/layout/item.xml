@@ -8,29 +8,81 @@
     <ImageView
         android:id="@+id/item_icon"
         android:layout_width="30dip"
-        android:layout_height="50dip"
+        android:layout_height="48dip"
         android:scaleType="center" />
 
-    <TextView
-        android:id="@+id/name"
-        android:layout_width="90dip"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
-
-    <TextView
-        android:id="@+id/rate"
-        android:layout_width="0dip"
+    <LinearLayout
+        android:layout_width="70dip"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_weight="1"
-        android:gravity="right" />
+        android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/rate1"
+        <TextView
+            android:id="@+id/abbre"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="USD"
+            android:textSize="20dip"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="加拿大幣"
+            android:textSize="12dip" />
+    </LinearLayout>
+
+    <TableLayout
         android:layout_width="0dip"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_height="fill_parent"
         android:layout_weight="1"
-        android:gravity="right" />
+        android:gravity="center" >
 
+        <TableRow>
+
+            <TextView
+                android:id="@+id/rate_buy_cash"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:text="01.000000"
+                android:textSize="16dip" />
+
+            <TextView
+                android:id="@+id/rate_buy_spot"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:text="03.000000"
+                android:textSize="16dip" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                android:id="@+id/rate_sell_cash"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:text="02.000000"
+                android:textColor="@color/gray"
+                android:textSize="16dip" />
+
+            <TextView
+                android:id="@+id/rate_sell_spot"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:text="04.000000"
+                android:textColor="@color/gray"
+                android:textSize="16dip" />
+        </TableRow>
+    </TableLayout>
 </LinearLayout>

@@ -5,4 +5,5 @@
     <color name="odd">#F8F6F1</color>
 	<color name="normal">#000000</color>
 	<color name="red">#FF0000</color>
+	<color name="gray">#777777</color>
 </resources>
