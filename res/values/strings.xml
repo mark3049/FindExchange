@@ -64,5 +64,6 @@
     <string name="enable_auto_update">啟動自動更新</string>
     <string name="disable_autoupdate">取消自動更新</string>
     <string name="msg_no_find">查無%s資料 </string>
+    <string name="no_connect">無網路連線</string>
 
 </resources>

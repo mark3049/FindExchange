@@ -7,7 +7,6 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -16,13 +15,15 @@ import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
 
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -112,23 +113,6 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		m_listView.setOnItemClickListener(this);
 		setProgressBarIndeterminateVisibility(false);
 
-	}
-
-	private void createTimer(long delay) {
-		if (m_timer != null) {
-			m_timer.cancel();
-		}
-		m_timer = new Timer(true);
-		TimerTask m_task = new TimerTask() {
-
-			@Override
-			public void run() {
-				Message msg = new Message();
-				msg.what = 1;
-				handler.sendMessage(msg);
-			}
-		};
-		m_timer.schedule(m_task, delay);
 	}
 
 	private void createTimer(long delay, long period) {
@@ -252,6 +236,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	}
 
 	private String Download(String myurl) throws IOException {
+
 		URL url = new URL(myurl);
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		try {
@@ -285,6 +270,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			String file = "";
 			try {
 				file = Download(urls[0]);
+				if (file == null)
+					return null;
 				ExchangeRateProvider provider = new ExchangeRateProvider(
 						MainActivity.this, m_DollarShortNames);
 				provider.Parser(file);
@@ -336,6 +323,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			try {
 				index = position[0];
 				file = Download(YahooFind.getURL(m_DollarShortNames[index]));
+				if (file == null)
+					return null;
 				YahooFind find = new YahooFind();
 				find.parser(file);
 				return find;
@@ -378,17 +367,31 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	private void Update(boolean showDialog) {
 		if (isUpdateRunning)
 			return;
-
-		isUpdateRunning = true;
-		if (title == null)
-			title = this.getString(R.string.dialog_title_wait);
-		if (message == null)
-			message = getString(R.string.dialog_body_update);
-		if (showDialog) {
-			myDialog = ProgressDialog.show(this, title, message, true, true);
+		ConnectivityManager CM = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo info = CM.getActiveNetworkInfo();
+		boolean isConnect = true;
+		if (info == null || !info.isConnected() || info.isRoaming()) {
+			isConnect = false;
 		}
-		setProgressBarIndeterminateVisibility(true);
-		new DownloadWebpageText().execute(ExchangeRateProvider.web_url);
+		if (isConnect) {
+			isUpdateRunning = true;
+			if (title == null)
+				title = this.getString(R.string.dialog_title_wait);
+			if (message == null)
+				message = getString(R.string.dialog_body_update);
+			if (showDialog) {
+				myDialog = ProgressDialog
+						.show(this, title, message, true, true);
+			}
+			setProgressBarIndeterminateVisibility(true);
+			new DownloadWebpageText().execute(ExchangeRateProvider.web_url);
+		} else {
+			if (showDialog) {
+				Toast.makeText(MainActivity.this,
+						getString(R.string.no_connect), Toast.LENGTH_SHORT)
+						.show();
+			}
+		}
 	}
 
 	@Override
