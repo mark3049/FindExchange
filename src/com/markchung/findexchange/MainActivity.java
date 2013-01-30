@@ -30,15 +30,18 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements OnItemClickListener {
+public class MainActivity extends Activity implements OnItemClickListener,
+		OnClickListener {
 	private final static String TAG = "findexchange";
 	private static final int SEC = 1000;
 	private static final int MIN = 60 * SEC;
@@ -56,6 +59,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	private ItemListAdapter adapter;
 	private boolean isUpdateRunning = false;
 	private Calendar m_lastCheckUpdate;
+	private Button m_button;
 	private boolean isAutoUpdate = true;
 	private static final String myAdID = "a150724cb805164";
 	private static final String myTestDevice = "BA76119486D364D047D0C789B4F61E46";
@@ -91,6 +95,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		CreateAdRequest(this, (LinearLayout) findViewById(R.id.adview));
 		m_listView = (ListView) this.findViewById(R.id.context);
 		m_lastdateView = (TextView) findViewById(R.id.last_update);
+		m_button = (Button) findViewById(R.id.update_btn);
+		m_button.setOnClickListener(this);
 		m_DollarShortNames = this.getResources().getStringArray(
 				R.array.dollar_short);
 		m_DollarDispayNames = this.getResources()
@@ -203,21 +209,27 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	@Override
 	public boolean onMenuOpened(int featureId, Menu menu) {
 
-		menu.findItem(R.id.enable_auto_update).setVisible(!isAutoUpdate);
-		menu.findItem(R.id.disable_auto_update).setVisible(isAutoUpdate);
+		MenuItem item = menu.findItem(R.id.enable_auto_update);
+		if (item != null)
+			item.setVisible(!isAutoUpdate);
+		item = menu.findItem(R.id.disable_auto_update);
+		if (item != null)
+			item.setVisible(isAutoUpdate);
 
 		return true;
 	}
-
+	private void updateInstant(){
+		Update(true);
+		if (isAutoUpdate) {
+			createTimer(UpdateDestion, UpdateDestion);
+		}		
+	}
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		switch (id) {
 		case R.id.update:
-			Update(true);
-			if (isAutoUpdate) {
-				createTimer(UpdateDestion, UpdateDestion);
-			}
+			updateInstant();
 			break;
 		case R.id.enable_auto_update:
 		case R.id.disable_auto_update:
@@ -419,5 +431,10 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			adRequest.addTestDevice(myTestDevice2);
 		}
 		adview.loadAd(adRequest);
+	}
+
+	@Override
+	public void onClick(View v) {
+		updateInstant();
 	}
 }
