@@ -209,6 +209,7 @@ public class MainActivity extends Activity implements OnItemClickListener,
 	@Override
 	public boolean onMenuOpened(int featureId, Menu menu) {
 
+		if(menu==null) return true;
 		MenuItem item = menu.findItem(R.id.enable_auto_update);
 		if (item != null)
 			item.setVisible(!isAutoUpdate);
