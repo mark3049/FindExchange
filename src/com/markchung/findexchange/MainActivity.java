@@ -61,8 +61,8 @@ public class MainActivity extends Activity implements OnItemClickListener,
 	private Calendar m_lastCheckUpdate;
 	private Button m_button;
 	private boolean isAutoUpdate = true;
-	private static final String myAdID = "a150724cb805164";
-	private static final String myTestDevice = "BA76119486D364D047D0C789B4F61E46";
+	private static final String myAdID = "ca-app-pub-3822862541892480/8267620237";
+	private static final String myTestDevice = "D7EA498B187E2AEFC1B647DA2A98CC64";
 	private static final String myTestDevice2 = "CF95DC53F383F9A836FD749F3EF439CD";
 	private AdView adview;
 
