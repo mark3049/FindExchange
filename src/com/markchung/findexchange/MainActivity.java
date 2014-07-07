@@ -116,7 +116,7 @@ public class MainActivity extends Activity implements OnItemClickListener,
 		adapter = new ItemListAdapter(this, m_dataProvider,
 				m_DollarDispayNames, m_DollarShortNames);
 		m_listView.setAdapter(adapter);
-		m_listView.setOnItemClickListener(this);
+		//m_listView.setOnItemClickListener(this);
 		setProgressBarIndeterminateVisibility(false);
 
 	}
