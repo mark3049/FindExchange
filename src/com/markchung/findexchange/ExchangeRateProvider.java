@@ -1,13 +1,15 @@
 package com.markchung.findexchange;
 
+import java.io.IOException;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
 public class ExchangeRateProvider {
-	public final static String web_url = "http://rate.bot.com.tw/Pages/Static/UIP003.zh-TW.htm";
+	public final static String web_url = "http://rate.bot.com.tw/xrt/flcsv/0/day";
 	private String m_DollarShortNames[];
 	private final static String TAG = "ExchangeRateProvider";
 	public final static int buy_cash = 0;
@@ -110,75 +112,36 @@ public class ExchangeRateProvider {
 		return -1;
 	}
 
-	private void parserItem(String line) {
-		int start = line.indexOf('(');
-		int end = line.indexOf(')');
-		String tmp;
-		int index;
-		tmp = line.substring(start + 1, end);
-		index = findIndex(tmp);
-		if (index < 0)
-			return;
-		int count = 0;
-		do {
-			start = line.indexOf("decimal\">", end + 1);
-			if (start < 0)
-				break;
-			end = line.indexOf("</td>", start + 1);
-			if (end < 0)
-				break;
-			tmp = line.substring(start + 9, end);
-			if (!tmp.equals("-")) {
-				try {
-					items[index].rate[count] = Double.parseDouble(tmp);
-					// items[index].rate[count] = Math.random();
-				} catch (NumberFormatException e) {
-
-				}
-			} else {
-				items[index].rate[count] = -1;
-			}
-			++count;
-			if (count >= 4)
-				break;
-		} while (true);
+	private String getLastCSVTime(String strtime){
+		//0123 45 67 89 AB
+		//2017 03 01 14 30		
+		return String.format("%s/%s/%s %s:%s",
+				strtime.substring(0,4),
+				strtime.substring(4,6),
+				strtime.substring(6,8),
+				strtime.substring(8,10),
+				strtime.substring(10)
+				);
+		
 	}
-
-	/*
-	 * public void Dump() { for (int i = 0; i < items.length; ++i) {
-	 * System.out.print(items[i].tag); System.out.print(" "); for (int j = 0; j
-	 * < 2; ++j) { if (items[i].rate[j] > 0) {
-	 * System.out.print(items[i].rate[j]); } else { System.out.print("-"); }
-	 * System.out.print("\t"); } System.out.println(); } if (LastDate != null) {
-	 * System.out.println(LastDate); } }
-	 */
-	private final static String time_tag = "±¾µP®É¶¡¡G&nbsp;";
-
-	public boolean Parser(String htmlfile) {
-		int start, end;
-		start = end = 0;
-		String tmp;
-		start = htmlfile.indexOf(time_tag);
-		if (start > 0) {
-			end = htmlfile.indexOf("</td>", start + time_tag.length());
-			if (end > 0) {
-				tmp = htmlfile.substring(start + time_tag.length(), end);
-				web_format_LastDate = tmp;
-				m_lastDate = parserLastDate(web_format_LastDate);
+	public boolean ParserCSV(ArrayList<String[]> csvfiles,String filename){
+		String time = filename.substring(0, filename.lastIndexOf('.'));
+		Log.d(TAG, "time = " + time);
+		web_format_LastDate = getLastCSVTime(time);
+		m_lastDate = parserLastDate(web_format_LastDate);
+		int index;
+		int [] arrayIndex = new int[]{2,12,3,13};
+		for(int i=1;i<csvfiles.size();++i){
+			String [] itemArray = csvfiles.get(i);
+			if (itemArray.length <20) continue;
+			index = findIndex(itemArray[0]);
+			if(index<0) continue;
+			for(int k=0;k<4;++k){				
+				items[index].rate[k] = Double.parseDouble(itemArray[arrayIndex[k]]);
+				if(items[index].rate[k]<=0) items[index].rate[k] = -1;
 			}
+			
 		}
-		do {
-			start = htmlfile.indexOf("<tr", end + 1);
-			if (start < 0)
-				break;
-			end = htmlfile.indexOf("</tr>", start + 1);
-			if (end < 0)
-				break;
-			tmp = htmlfile.substring(start, end);
-			if (tmp.indexOf("class=\"decimal\"") < 0)
-				continue;
-			parserItem(tmp);
-		} while (true);
-		return m_lastDate != null;
+		return true;
 	}
 }

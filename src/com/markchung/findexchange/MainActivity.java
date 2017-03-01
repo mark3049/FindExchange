@@ -6,8 +6,10 @@ import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -39,6 +41,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import au.com.bytecode.opencsv.CSVReader;
 
 public class MainActivity extends Activity implements OnItemClickListener,
 		OnClickListener {
@@ -247,7 +250,7 @@ public class MainActivity extends Activity implements OnItemClickListener,
 		}
 		return true;
 	}
-
+	
 	private String Download(String myurl) throws IOException {
 
 		URL url = new URL(myurl);
@@ -260,7 +263,18 @@ public class MainActivity extends Activity implements OnItemClickListener,
 			// con.setDoOutput(true);
 			con.connect();
 			int response = con.getResponseCode();
+			String msg = con.getResponseMessage();
+			String raw = con.getHeaderField("Content-Disposition");
+			// raw = "attachment; filename=abc.jpg"
+			String timeMask = null;
+			if(raw != null && raw.indexOf("=") != -1) {
+			    String fileName = raw.split("=")[1]; //getting value after '='
+			    timeMask = fileName.split("@|.")[1]; 
+			} else {
+			    // fall back to random generated file name?
+			}
 			Log.d(MainActivity.TAG, "The response is: " + response);
+			Log.d(MainActivity.TAG,"The Response Message is:" + msg);
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					con.getInputStream(), "UTF-8"));
 			String decodeString;
@@ -281,17 +295,41 @@ public class MainActivity extends Activity implements OnItemClickListener,
 		@Override
 		protected ExchangeRateProvider doInBackground(String... urls) {
 			String file = "";
+			HttpURLConnection con = null;
 			try {
-				file = Download(urls[0]);
-				if (file == null)
-					return null;
+				URL url = new URL(urls[0]);
+				con = (HttpURLConnection) url.openConnection();
+				con.setRequestMethod("GET");
+				con.setReadTimeout(10 * 1000);
+				con.setConnectTimeout(15 * 1000);
+				con.setDoInput(true);
+				con.connect();
+				int response = con.getResponseCode();
+				Log.d(MainActivity.TAG, "The response is: " + response);
+				if (response != 200) return null;
+				String raw = con.getHeaderField("Content-Disposition");
+				if (raw == null || raw.indexOf('=') == -1 ) return null;
+				String fileName = raw.split("=")[1];
+				
+				CSVReader reader = new CSVReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+				String next[];
+				ArrayList<String[]> list = new ArrayList<String[]>();
+				while(true){
+					next = reader.readNext();
+					if(next == null) break;
+					list.add(next);
+				}
+				reader.close();
+				
 				ExchangeRateProvider provider = new ExchangeRateProvider(
 						MainActivity.this, m_DollarShortNames);
-				provider.Parser(file);
+				provider.ParserCSV(list,fileName.split("@")[1]);
 				return provider;
 			} catch (IOException e) {
 				return null;
 
+			} finally {
+				if (con != null) con.disconnect();
 			}
 		}
 
